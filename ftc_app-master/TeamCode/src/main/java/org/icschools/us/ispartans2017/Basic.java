@@ -34,6 +34,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -47,6 +49,9 @@ public class Basic extends LinearOpMode {
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
     private DcMotor armMotor = null;
+    private DcMotor gripperMotor = null;
+    private Servo   testServo = null;
+    private boolean isFirst = false;
 
     @Override
     public void runOpMode() {
@@ -62,6 +67,8 @@ public class Basic extends LinearOpMode {
         leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
         armMotor  = hardwareMap.get(DcMotor.class, "arm_drive");
+        gripperMotor = hardwareMap.get(DcMotor.class, "gripper_drive");
+        testServo = hardwareMap.get(Servo.class, "test_servo");
 
 
         // Most robots need the motor on one side to be reversed to drive forward
@@ -99,13 +106,69 @@ public class Basic extends LinearOpMode {
             leftDrive.setPower(leftPower);
             rightDrive.setPower(rightPower);
 
+            /*double armPower;
+            double gripperPower;
+            double armLift = gamepad2.left_stick_x;
+            double gripperLift = gamepad2.right_stick_x;
+            armPower = Range.clip(armLift, -1, 1);
+            gripperPower = Range.clip(gripperLift, -1, 1);
+
+            armMotor.setPower(armPower);
+            gripperMotor.setPower(gripperPower);
+*/
+
             if(gamepad2.a)
             {
                 ArmLift();
             }
+            else {
+                StopArm();
+            }
             if(gamepad2.b){
                 ArmFall();
             }
+            else
+            {
+                StopArm();
+            }
+            if(gamepad2.x)
+            {
+                GripperUp();
+            }
+            else{
+                StopGripper();
+            }
+            if(gamepad2.y)
+            {
+                GripperDown();
+            }
+            else{
+                StopGripper();
+            }
+            if(gamepad2.right_bumper)
+            {
+                /*boolean isMotorInactive = true;
+                telemetry.addData("Bumper","Pressed");
+                telemetry.update();
+
+                isMotorInactive = (testServo.getPosition()==.5 || testServo.getPosition()==0);
+
+                if(isFirst && isMotorInactive) {
+                    testServo.setPosition(.5);
+                    isFirst = !isFirst;
+                }
+                else if(isMotorInactive)
+                {
+                    testServo.setPosition(0);
+                    isFirst = !isFirst;
+                }*/
+                testServo.setPosition(.5);
+            }
+            if(gamepad2.left_bumper)
+            {
+                testServo.setPosition(.01);
+            }
+
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -113,21 +176,40 @@ public class Basic extends LinearOpMode {
             telemetry.update();
         }
     }
+    private void StopGripper(){
+        gripperMotor.setPower(0);
+    }
+    private void GripperUp(){
+        gripperMotor.setDirection(DcMotor.Direction.FORWARD);
+        gripperMotor.setPower(.35);
+
+    }
+    private void GripperDown(){
+        gripperMotor.setDirection(DcMotor.Direction.REVERSE);
+        gripperMotor.setPower(.35);
+    }
     private void ArmLift(){
-        armMotor.setTargetPosition(630);
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setPower(.5);
+        //armMotor.setTargetPosition(630);
+        //armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //armMotor.setPower(.5);
 
         //armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        armMotor.setDirection(DcMotor.Direction.FORWARD);
+        armMotor.setPower(.75);
     }
     private void ArmFall()
     {
-        armMotor.setTargetPosition(0);
-        armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armMotor.setPower(.5);
+        //armMotor.setTargetPosition(0);
+        //armMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //armMotor.setPower(.5);
 
         //armMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        armMotor.setDirection(DcMotor.Direction.REVERSE);
+        armMotor.setPower(.75);
+    }
+    private void StopArm(){
+        armMotor.setPower(0);
     }
 }
